@@ -25,11 +25,7 @@ Servo servo;
 
 // Funções de dispositivos
 void banheiro(uint8_t State) {
-    if (State & 1) {
-      Firebase.setBool(firebaseData, "/home/bathroom/light", true);
-    } else {
-      Firebase.setBool(firebaseData, "/home/bathroom light", false);
-    }
+  Firebase.setBool(firebaseData, "/home/bathroom/light", State & 1);
 }
 
 void abrePorta(uint8_t State) {
@@ -50,6 +46,10 @@ void abrePorta(uint8_t State) {
 
 void luzSala(uint8_t State) {
     Firebase.setBool(firebaseData, "/home/livingroom/light", State & 1);
+}
+
+void luzCoz(uint8_t State) {
+    Firebase.setBool(firebaseData, "/home/kitchen/light", State & 1);
 }
 
 void tv(uint8_t State) {
@@ -77,26 +77,37 @@ void atualizaEstadoPinos() {
     // }
    
     // // Atualiza o pino da luz do banheiro
-    // if (Firebase.getBool(firebaseData, "/home/bathroom/light")) {
-    //     if (firebaseData.dataType() == "boolean") {
-    //         digitalWrite(34, firebaseData.boolData());
-    //         Serial.println("Estado do ventilador atualizado.");
-    //     }
-    // } else {
-    //     Serial.println("Erro ao ler /home/livingroom/air:");
-    //     Serial.println(firebaseData.errorReason());
-    // }
+    if (Firebase.getBool(firebaseData, "/home/bathroom/light")) {
+        if (firebaseData.dataType() == "boolean") {
+            digitalWrite(12, firebaseData.boolData());
+            Serial.println("Estado do ventilador atualizado.");
+        }
+    } else {
+        Serial.println("Erro ao ler /home/bathroom/light:");
+        Serial.println(firebaseData.errorReason());
+    }
 
     // // Atualiza o pino da luz da sala
-    // if (Firebase.getBool(firebaseData, "/home/livingroom/light")) {
-    //     if (firebaseData.dataType() == "boolean") {
-    //         digitalWrite(12, firebaseData.boolData());
-    //         Serial.println("Estado da luz da sala atualizado.");
-    //     }
-    // } else {
-    //     Serial.println("Erro ao ler /home/livingroom/light:");
-    //     Serial.println(firebaseData.errorReason());
-    // }
+    if (Firebase.getBool(firebaseData, "/home/livingroom/light")) {
+        if (firebaseData.dataType() == "boolean") {
+            digitalWrite(13, firebaseData.boolData());
+            Serial.println("Estado da luz da sala atualizado.");
+        }
+    } else {
+        Serial.println("Erro ao ler /home/livingroom/light:");
+        Serial.println(firebaseData.errorReason());
+    }
+
+    // // Atualiza o pino da luz da cozinha
+    if (Firebase.getBool(firebaseData, "/home/kitchen/light")) {
+        if (firebaseData.dataType() == "boolean") {
+            digitalWrite(27, firebaseData.boolData());
+            Serial.println("Estado da luz da sala atualizado.");
+        }
+    } else {
+        Serial.println("Erro ao ler /home/livingroom/light:");
+        Serial.println(firebaseData.errorReason());
+    }
 
     // // Atualiza o pino da TV
     // if (Firebase.getBool(firebaseData, "/home/livingroom/tv")) {
@@ -140,9 +151,15 @@ void setup() {
     Serial.println("Conexão ao Firebase bem-sucedida!");
 
     pinMode(14, OUTPUT);
+    pinMode(12, OUTPUT);
+    pinMode(13, OUTPUT);
+    pinMode(27, OUTPUT);
 
     // Configuração Alexa
-    Alexa.addDevice("raio laser", alarme);
+    Alexa.addDevice("alarme da casa", alarme);
+    Alexa.addDevice("luz do banheiro", banheiro);
+    Alexa.addDevice("luz da sala", luzSala);
+    Alexa.addDevice("luz da cozinha", luzCoz);
     Alexa.begin();
 }
 
