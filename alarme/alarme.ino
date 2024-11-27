@@ -14,7 +14,7 @@ void loop() {
 
   Serial.println(digitalRead(12));
 
-  if ( digitalRead(12)) {
+  if (digitalRead(12)) {
     ativou = true;
   }
 
