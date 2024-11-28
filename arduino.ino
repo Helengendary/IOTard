@@ -6,11 +6,17 @@
 #define lin 2
 #define ende 0x27
 
-int canalAtual = 12;
-
 Servo servo;
+Servo servo2;
 
 LiquidCrystal_I2C lcd(ende, col, lin);
+
+bool fechada = true; // Variável global
+
+// Protótipos das funções
+void canalTrue();
+void canalFalse();
+void rolarTexto(String texto);
 
 byte bonecoParado[8] = {
   B00100,
@@ -88,8 +94,6 @@ void setup() {
   servo.attach(8); // servo motor
   servo2.attach(9); // servo motor
 
-  bool fechada = true;
-
   lcd.init();
   lcd.backlight();
   lcd.clear();
@@ -103,53 +107,9 @@ void setup() {
 }
 
 void loop() {
-    
     // canal da tv
     if (digitalRead(2)) {
-        canalTrue();
-    } else {
-        canalFalse();
-    }
-
-    // alarme
-    if (digitalRead(3)) {
-        if (!digitalRead(5) || !digitalRead(6)) {
-            digitalWrite(10, HIGH);
-        }
-    } else {
-        digitalWrite(10, LOW);
-    }
-
-    if (digitalRead(7)) {
-        for(int i = 0; i < 90; i++) {
-            servo.write(i);
-            servo2.write(i+90);
-        }
-        fechada = false
-    } else {
-        if (!fechada) {
-            for(int i = 90; i > 0; i--) {
-                servo.write(i+90);
-                servo2.write(i);
-            }
-        }
-    }
-}
-
-// Função para rolar o texto na segunda linha
-void rolarTexto(String texto) {
-  String espaco = "                "; // Espaço vazio para limpar a linha
-  String mensagem = texto + espaco;  // Adiciona espaços ao final da mensagem
-
-  for (int i = 0; i < mensagem.length(); i++) {
-    lcd.setCursor(0, 1);
-    lcd.print(mensagem.substring(i, i + col));  // Exibe um "pedaço" da mensagem
-    delay(300);  // Controle da velocidade da rolagem
-  }
-}
-
-void canalTrue() {
-    for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
       lcd.clear();
       lcd.setCursor(i, 1);  // Posição do boneco
       lcd.write((i % 2 == 0) ? 1 : 2);  // Alterna entre os passos
@@ -198,10 +158,49 @@ void canalTrue() {
     lcd.setCursor(3, 0);
     lcd.print("Persistencia!");
     delay(2000);
+    } else {
+        canalFalse();
+    }
+
+    // alarme
+    if (digitalRead(3)) {
+        if (!digitalRead(6)) {
+            digitalWrite(10, HIGH);
+        }
+    } else {
+        digitalWrite(10, LOW);
+    }
+
+    if (digitalRead(7)) {
+      for (int i = 90; i > 0; i--) {
+          servo.write(i);        // Servo 1: 90 a 0 graus
+          servo2.write(i + 90);  // Servo 2: 135 a 45 graus
+      }
+    } else {
+      for (int i = 0; i < 90; i++) {
+          servo.write(i);        // Servo 1: 0 a 90 graus
+          servo2.write(i - 90);  // Servo 2: 45 a 135 graus
+      }
+    }
+}
+
+// Definições das funções
+void rolarTexto(String texto) {
+  String espaco = "                "; // Espaço vazio para limpar a linha
+  String mensagem = texto + espaco;  // Adiciona espaços ao final da mensagem
+
+  for (int i = 0; i < mensagem.length(); i++) {
+    lcd.setCursor(0, 1);
+    lcd.print(mensagem.substring(i, i + col));  // Exibe um "pedaço" da mensagem
+    delay(300);  // Controle da velocidade da rolagem
+  }
+}
+
+void canalTrue() {
+    
 }
 
 void canalFalse() {
-
     // Manchetes para exibir
     String manchetes[] = {
         "Nova tecnologia 2024!",
